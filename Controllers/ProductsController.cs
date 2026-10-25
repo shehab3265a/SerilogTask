@@ -1,10 +1,9 @@
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace SerilogTask.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/products")]
 public class ProductsController : ControllerBase
 {
     private readonly ILogger<ProductsController> _logger;
@@ -14,31 +13,30 @@ public class ProductsController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    public IActionResult GetProducts()
+    [HttpGet("{id:int}")]
+    public IActionResult GetById(int id)
     {
-        _logger.LogInformation("Getting all products");
+        _logger.LogInformation("Getting product with ID {ProductId}", id);
 
-        var products = new[]
+        if (id <= 0)
         {
-            new { Id = 1, Name = "Laptop", Price = 25000 },
-            new { Id = 2, Name = "Phone", Price = 15000 }
-        };
-
-        return Ok(products);
-    }
-
-    [HttpGet("error")]
-    public IActionResult TestError()
-    {
-        try
-        {
-            throw new InvalidOperationException("Test exception for Serilog");
+            _logger.LogWarning("Invalid product ID: {ProductId}", id);
+            return BadRequest("Invalid product ID");
         }
-        catch (Exception ex)
+
+        if (id == 99)
         {
-            _logger.LogError(ex, "An error occurred while testing Serilog");
-            return Problem("A test error was logged successfully.");
+            try
+            {
+                throw new InvalidOperationException("Test exception");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve product {ProductId}", id);
+                return StatusCode(500, "Something went wrong");
+            }
         }
+
+        return Ok(new { Id = id, Name = "Laptop" });
     }
 }

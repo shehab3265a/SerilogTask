@@ -1,4 +1,3 @@
-
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,19 +16,14 @@ try
 
     var app = builder.Build();
 
-    app.UseSerilogRequestLogging();
-
     if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "SerilogTask API v1");
-    });
-}
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
     app.UseHttpsRedirection();
-
+    app.UseSerilogRequestLogging();
     app.MapControllers();
 
     app.Run();
@@ -42,4 +36,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-
